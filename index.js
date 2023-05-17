@@ -44,8 +44,8 @@ app.post('/api/users', (req, res) => {
 });
 
 app.post('/api/users/:_id/exercises', (req, res) => {
-  // let id = req.body._id
-  let id = req.body.id
+  let id = req.params._id
+  // let id = req.body.id
   let description = req.body.description
   let duration = req.body.duration
   let date = req.body.date ? req.body.date : new Date()
@@ -60,7 +60,7 @@ app.post('/api/users/:_id/exercises', (req, res) => {
 
   User.findByIdAndUpdate(id, {$push: log, count: +1}, {new: true }, function(err, data) {
     if (err) return console.error(err);
-    // console.log(data)
+    // console.log("Datos actualizados: ",JSON.stringify(data))
     res.json({_id: id, username: data.username, date: new Date(date).toDateString(), duration: duration, description: description})
   })
 });

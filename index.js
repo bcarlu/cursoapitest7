@@ -100,7 +100,7 @@ app.get('/api/users/:_id/logs', (req, res) => {
       } else {
         return log
       }
-    })
+    }).slice(0,limit ? limit : log.length)
     
     let resp = {
       _id: id, 

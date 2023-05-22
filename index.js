@@ -57,27 +57,27 @@ app.post('/api/users', (req, res) => {
   })
 });
 
-app.post('/api/users/:_id/exercises', (req, res) => {
-  let id = req.params._id
-  let description = req.body.description
-  let duration = req.body.duration
-  let date = req.body.date ? req.body.date : new Date()
-  let log = {
-    id_user: id,
-    description: description,
-    duration: duration,
-    date: date
-  }
+// app.post('/api/users/:_id/exercises', (req, res) => {
+//   let id = req.params._id
+//   let description = req.body.description
+//   let duration = req.body.duration
+//   let date = req.body.date ? req.body.date : new Date()
+//   let log = {
+//     id_user: id,
+//     description: description,
+//     duration: duration,
+//     date: date
+//   }
 
-  Exercises.create(log, function(err, data) {
-    if (err) return console.error(err);
-    data.populate('id_user', function(err, userData) {
-      if (err) return console.error(err);
-      // Acceder al nombre del usuario a través del campo id_user
-      res.json({_id: id, username: userData.id_user.username, date: new Date(date).toDateString(), duration: duration, description: description})
-    })
-  })
-});
+//   Exercises.create(log, function(err, data) {
+//     if (err) return console.error(err);
+//     data.populate('id_user', function(err, userData) {
+//       if (err) return console.error(err);
+//       // Acceder al nombre del usuario a través del campo id_user
+//       res.json({_id: id, username: userData.id_user.username, date: new Date(date).toDateString(), duration: duration, description: description})
+//     })
+//   })
+// });
 
 app.get('/api/users/:_id/logs', (req, res) => {
   let from = req.query.from ? new Date(req.query.from) : false
@@ -100,8 +100,10 @@ app.get('/api/users/:_id/logs', (req, res) => {
       } else {
         return log
       }
-    }).slice(0,limit ? limit : log.length)
+    })
     
+    log = log.slice(0,limit ? limit : log.length)
+
     let resp = {
       _id: id, 
       username: data[0].id_user.username, 
@@ -116,24 +118,34 @@ app.get('/api/users/:_id/logs', (req, res) => {
   })
 });
 
-// app.post('/api/users/:_id/exercises', (req, res) => {
-//   let id = req.params._id
-//   let description = req.body.description
-//   let duration = req.body.duration
-//   let date = req.body.date ? req.body.date : new Date()
-//   let log = {
-//     log: {
-//       description: description,
-//       duration: duration,
-//       date: date
-//     }
-//   }
+app.post('/api/users/:_id/exercises', (req, res) => {
+  let id = req.params._id
+  let description = req.body.description
+  let duration = req.body.duration
+  let date = req.body.date ? req.body.date : new Date()
+  let log = {
+      id_user: id,
+      description: description,
+      duration: duration,
+      date: date
+  }
 
-//   User.findByIdAndUpdate(id, {$push: log, count: +1}, {new: true }, function(err, data) {
-//     if (err) return console.error(err);
-//     res.json({_id: id, username: data.username, date: new Date(date).toDateString(), duration: duration, description: description})
-//   })
-// });
+  User.findById(id, function(err, data) {
+    if (err) return console.error(err);
+    Exercises.create(log, function(err, ExerciseData) {      
+      if (err) return console.error(err);
+      res.json({
+        _id: id, 
+        username: data.username, 
+        date: new Date(date).toDateString(), 
+        duration: duration, 
+        description: description
+      })
+    })
+
+    // res.json({_id: id, username: data.username, date: new Date(date).toDateString(), duration: duration, description: description})
+  })
+});
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)
